@@ -360,6 +360,58 @@ req_recv_next(struct context *ctx, struct conn *conn, bool alloc)
     return msg;
 }
 
+
+static struct mbuf *
+get_mbuf(struct msg *msg)
+{
+    struct mbuf *mbuf;
+
+    mbuf = STAILQ_LAST(&msg->mhdr, mbuf, next);
+    if (mbuf == NULL || mbuf_full(mbuf)) {
+        mbuf = mbuf_get();
+        if (mbuf == NULL) {
+            return NULL;
+        }
+
+        mbuf_insert(&msg->mhdr, mbuf);
+        msg->pos = mbuf->pos;
+    }
+    ASSERT(mbuf->end - mbuf->last > 0);
+    return mbuf;
+}
+
+static void
+reply(struct context *ctx, struct conn *conn, struct msg *smsg, char *_msg) {
+    struct mbuf *mbuf;
+    int n;
+    struct msg *msg = msg_get(conn, true, conn->redis);
+    if (msg == NULL) {
+        conn->err = errno;
+        return;
+    }
+
+    mbuf = get_mbuf(msg);
+    if (mbuf == NULL) {
+        msg_put(msg);
+        return;
+    }
+
+    smsg->peer = msg;
+    msg->peer = smsg;
+    msg->request = 0;
+
+    n = (int)strlen(_msg);
+    memcpy(mbuf->last, _msg, (size_t)n);
+    mbuf->last += n;
+    msg->mlen += (uint32_t)n;
+    smsg->done = 1;
+    event_add_out(ctx->evb, conn);
+    conn->enqueue_outq(ctx, conn, smsg);
+    
+}
+
+
+
 static bool
 req_filter(struct context *ctx, struct conn *conn, struct msg *msg)
 {
@@ -384,6 +436,20 @@ req_filter(struct context *ctx, struct conn *conn, struct msg *msg)
         conn->eof = 1;
         conn->recv_ready = 0;
         req_put(msg);
+        return true;
+    }
+
+    if (msg->type == MSG_REQ_REDIS_PING) {
+        log_debug(LOG_INFO, "filter ping req %"PRIu64" from c %d", msg->id,
+                  conn->sd);
+        reply(ctx, conn, msg, "+PONG\r\n");
+        return true;
+    }
+
+    if (msg->type == MSG_REQ_REDIS_INFO) {
+        log_debug(LOG_INFO, "filter info req %"PRIu64" from c %d", msg->id,
+                  conn->sd);
+        reply(ctx, conn, msg, "+redis_version:2.6.16\r\n");
         return true;
     }
 
@@ -585,3 +651,4 @@ req_send_done(struct context *ctx, struct conn *conn, struct msg *msg)
         req_put(msg);
     }
 }
+
