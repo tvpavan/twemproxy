@@ -59,7 +59,8 @@ typedef enum msg_type {
     MSG_RSP_MC_SERVER_ERROR,
     MSG_REQ_REDIS_DEL,                    /* redis commands - keys */
     MSG_REQ_REDIS_INFO,                   
-    MSG_REQ_REDIS_PING,                    
+    MSG_REQ_REDIS_PING, 
+    MSG_REQ_REDIS_KEYS,                    
     MSG_REQ_REDIS_EXISTS,
     MSG_REQ_REDIS_EXPIRE,
     MSG_REQ_REDIS_EXPIREAT,

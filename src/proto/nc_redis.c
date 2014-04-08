@@ -59,7 +59,7 @@ redis_arg0(struct msg *r)
 
     case MSG_REQ_REDIS_INFO:
     case MSG_REQ_REDIS_PING:
-    
+    case MSG_REQ_REDIS_KEYS:
         return true;
 
     default:
@@ -105,7 +105,7 @@ redis_arg1(struct msg *r)
     case MSG_REQ_REDIS_ZSCORE:
 
     case MSG_REQ_REDIS_INFO:
-    case MSG_REQ_REDIS_PING:
+    case MSG_REQ_REDIS_KEYS:
         return true;
 
     default:
@@ -570,6 +570,11 @@ redis_parse_req(struct msg *r)
 
                 if (str4icmp(m, 'p', 'i', 'n', 'g')) {
                     r->type = MSG_REQ_REDIS_PING;
+                    break;
+                }
+
+                if (str4icmp(m, 'k', 'e', 'y', 's')) {
+                    r->type = MSG_REQ_REDIS_KEYS;
                     break;
                 }
 
