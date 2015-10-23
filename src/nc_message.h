@@ -62,9 +62,8 @@ typedef enum msg_parse_result {
     ACTION( RSP_MC_CLIENT_ERROR )                                                                   \
     ACTION( RSP_MC_SERVER_ERROR )                                                                   \
     ACTION( REQ_REDIS_DEL )                    /* redis commands - keys */                          \
-    ACTION( REQ_REDIS_INFO )                     
-    ACTION( REQ_REDIS_PING ) 
-    ACTION( REQ_REDIS_KEYS )
+    ACTION( REQ_REDIS_INFO )                                                                        \
+    ACTION( REQ_REDIS_KEYS )                                                                        \
     ACTION( REQ_REDIS_EXISTS )                                                                      \
     ACTION( REQ_REDIS_EXPIRE )                                                                      \
     ACTION( REQ_REDIS_EXPIREAT )                                                                    \
@@ -77,7 +76,7 @@ typedef enum msg_parse_result {
     ACTION( REQ_REDIS_TYPE )                                                                        \
     ACTION( REQ_REDIS_APPEND )                 /* redis requests - string */                        \
     ACTION( REQ_REDIS_BITCOUNT )                                                                    \
-    ACTION( REQ_REDIS_BITPOS )                                                                    \
+    ACTION( REQ_REDIS_BITPOS )                                                                      \
     ACTION( REQ_REDIS_DECR )                                                                        \
     ACTION( REQ_REDIS_DECRBY )                                                                      \
     ACTION( REQ_REDIS_DUMP )                                                                        \
